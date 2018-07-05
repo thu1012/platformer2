@@ -1,0 +1,12 @@
+{ "columns":1,
+ "image":"ladder.png",
+ "imageheight":69,
+ "imagewidth":69,
+ "margin":0,
+ "name":"ladder",
+ "spacing":0,
+ "tilecount":1,
+ "tileheight":69,
+ "tilewidth":69,
+ "type":"tileset"
+}
