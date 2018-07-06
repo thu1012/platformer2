@@ -17,7 +17,7 @@
 			physics:{
 				default: 'arcade',
 				arcade: {
-					gravity: {y: 500},
+					gravity: {y: 900},
 					debug: false
 				}
 			},
@@ -33,11 +33,13 @@
 
 		var map;
 		var player;
+		var redGuardA;
 		var cursors;
-		var groundLayer, coinLayer, background;
+		var groundLayer, coinLayer, background, ladderLayer, sawLayer, turnLayer;
 		var text;
 		var score = 0;
 		var text;
+		var x = 200;
 
 		/**
 		 * [preload: This function is used to load the assets for our game]
@@ -53,11 +55,18 @@
 			//simple coin image
 			this.load.image('coin', 'assets/coinGold.png');
 
+			//redGuard
+			this.load.image('redGuard', 'assets/redGuard.png');
+
 			//simple ladder image
 			this.load.image('ladder', 'assets/ladder.png');
 
+			//simple saw image
+			this.load.image('saw', 'assets/saw.png');
+
 			//player animations
 			this.load.atlas('player', 'assets/player.png', 'assets/player.json');
+
 		}
 
 		/**
@@ -78,6 +87,8 @@
 				//tiles for the background
 				var backgroundTiles = map.addTilesetImage('tiles');
 
+				//tiles for the redGuard turn
+				var turnTiles = map.addTilesetImage('tiles');
 
 				//console.log(map)
 				//create the ground layer
@@ -85,6 +96,9 @@
 
 				//creat the background layer
 				backgroundLayer = map.createDynamicLayer('background', backgroundTiles, 0, 0);
+
+				//creat the turn layer
+				turnLayer = map.createDynamicLayer('turn', turnTiles, 0, 0);
 
 				//The player will collide with this layer
 				groundLayer.setCollisionByExclusion([-1]);
@@ -95,13 +109,20 @@
 
 
 			//PLAYER
-				
-				player = this.physics.add.sprite(200,200, 'player');
+				//level 1
+				player = this.physics.add.sprite(200,500, 'player');
+				//level 2
+				//player = this.physics.add.sprite(4400,1600, 'player');
+
 				player.setBounce(0.2);
 				player.setCollideWorldBounds(true);
 
 				//Add Keyboard Events
 				cursors = this.input.keyboard.createCursorKeys();
+
+			//REDGUARD
+				redGuardA = this.physics.add.sprite(4600,1600, 'redGuard');
+				player.setBounce(0.2);
 
 
 			//CAMERA
@@ -152,24 +173,42 @@
 
 				//add ladder as tiles
 				ladderLayer = map.createDynamicLayer('ladder', ladderTiles, 0, 0);
-				ladderLayer.setTileIndexCallback(17, climbLadder, this);
+				ladderLayer.setTileIndexCallback(18, climbLadder, this);
+				
+			//Saw
+				//Saw image used as tileset
+				var sawTiles = map.addTilesetImage('saw');
+
+				//add saw as tiles
+				sawLayer = map.createDynamicLayer('Saw', sawTiles, 0, 0);
+				sawLayer.setTileIndexCallback(19, collideSaw, this);
+
+			//redGuard
+				//add red guard function
+				turnLayer.setTileIndexCallback(1, redTurn, this);
 
 			//OBJECT COLLISIONS
 			
 				//Collision between floor and player
 				this.physics.add.collider(groundLayer, player);
 
+				//Collision between player and saw
+				this.physics.add.collider(player, sawLayer);
+
 				//Collision between coin and player
 				this.physics.add.overlap(player, coinLayer);
 
 				//Collision between ladder and player
-				//this.physics.add.overlap(player, ladderLayer);
+				this.physics.add.overlap(player, ladderLayer);
 				//this.physics.add.overlap(player, ladderLayer, climbLadder, null, this);
+				
+				this.physics.add.collider(groundLayer, redGuardA);
 
-			
+				this.physics.add.collider(turnLayer, redGuardA);
+
 			//SCORE UI
 				
-				text = this.add.text(20, 570, '0', {
+				text = this.add.text(20, 1300, '0', {
 					fontSize : '20px',
 					fill: '#ffffff'
 				});
@@ -183,11 +222,13 @@
 		 */
 		function update(){
 			//EVENTS / MECHANICS
-			
+				//give red guard velocity
 				
+				redGuardA.body.setVelocityX(x);
+
 				if( cursors.left.isDown ){ // If the left arrow key is pressed down
 					//activate motion
-					player.body.setVelocityX(-500);
+					player.body.setVelocityX(-350);
 
 					//activate animation
 					player.anims.play('walk', true);
@@ -197,7 +238,7 @@
 
 				}else if(cursors.right.isDown){  // If the right arrow key is pressed down
 					//activate motion
-					player.body.setVelocityX(500);
+					player.body.setVelocityX(350);
 
 					//activate animation
 					player.anims.play('walk', true);
@@ -211,7 +252,7 @@
 
 			    if((cursors.space.isDown || cursors.up.isDown)){
 					if(player.body.onFloor()){
-						player.body.setVelocityY(-500);
+						player.body.setVelocityY(-700);
 						player.anims.play('stand', true);
 					}
 				}
@@ -243,7 +284,30 @@
 			player.anims.play('stand', true);
 		}
 
+		function collideSaw (player, sawLayer){
+			this.physics.pause();
+			player.setTint(0xff0000);
+			player.anims.play('stand');
+			gameOver = true;
+		}
+
+		function redTurn (turnLayer, redGuardA){
+			console.log("redturn called");
+			x = x*-1;
+			console.log(x);
+		}
+
 	</script>	
 	
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
